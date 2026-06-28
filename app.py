@@ -332,8 +332,15 @@ def t(key: str, lang: str, **kwargs) -> str:
 # =============================================================================
 # 模型加载与预测函数
 # =============================================================================
-@st.cache_resource
+@st.cache_resource(show_spinner=False)
 def load_model():
+    if not os.path.exists(MODEL_PATH):
+        import requests
+        r = requests.get(MODEL_URL, stream=True, timeout=120)
+        r.raise_for_status()
+        with open(MODEL_PATH, "wb") as f:
+            for chunk in r.iter_content(chunk_size=8192):
+                f.write(chunk)
     return joblib.load(MODEL_PATH)
 
 
